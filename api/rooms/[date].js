@@ -1,10 +1,33 @@
 const fetch = require('cross-fetch').fetch;
 
+const allowCors = fn => async (req, res) => {
+    res.setHeader('Access-Control-Allow-Credentials', true)
+    res.setHeader('Access-Control-Allow-Origin', '*')
+
+    // another common pattern
+    // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
+    res.setHeader(
+        'Access-Control-Allow-Headers',
+        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+    )
+
+    if (req.method === 'OPTIONS') {
+        res.status(200).end()
+        return
+
+    }
+    return await fn(req, res)
+}
+
+
 export default async function handler(request, response) {
-    const { date } = request.query;
+    const {date} = request.query;
     let bookedHours = await getAllRoomsBookedHours(date);
     return response.end(JSON.stringify(bookedHours));
 }
+
+module.exports = allowCors(handler)
 
 // Room id to names mapping
 export const allRooms = {
@@ -13,8 +36,8 @@ export const allRooms = {
     5: 'Skarb Czarnobrodego',
 };
 
-export async function getRoomBookedHours(roomId,date){
-    const year = date.substr(0,4);
+export async function getRoomBookedHours(roomId, date) {
+    const year = date.substr(0, 4);
     let bookedHours = [];
 
     try {
@@ -40,10 +63,10 @@ export async function getRoomBookedHours(roomId,date){
         const parsedData = JSON.parse(data[date]);
         //extract hours from data
 
-        Object.entries(parsedData['hours']).forEach((info)=>{
+        Object.entries(parsedData['hours']).forEach((info) => {
             let roomHour = info[0];
             let roomInfo = info[1];
-            if(roomInfo.status ==='booked'){
+            if (roomInfo.status === 'booked') {
                 bookedHours.push(roomHour)
             }
         })
@@ -55,24 +78,24 @@ export async function getRoomBookedHours(roomId,date){
 
 }
 
-export async function getAllRoomsBookedHours(date){
+export async function getAllRoomsBookedHours(date) {
     let bookedHours = [];
     for (const room of Object.entries(allRooms)) {
         let roomId = room[0];
         let currRoomName = allRooms[roomId];
-        let currRoomBooked = await getRoomBookedHours(roomId,date);
+        let currRoomBooked = await getRoomBookedHours(roomId, date);
 
-        if(currRoomBooked.length === 0) continue;
+        if (currRoomBooked.length === 0) continue;
         //add room name to each hour booked, making it a {hour,Roomname} object
-        currRoomBooked.forEach((bookedHour)=>{
-            let bookingObj = {'hour':bookedHour,'room':currRoomName};
+        currRoomBooked.forEach((bookedHour) => {
+            let bookingObj = {'hour': bookedHour, 'room': currRoomName};
             bookedHours.push(bookingObj)
         })
 
     }
 
     //sort by hours
-    bookedHours.sort(function(a, b) {
+    bookedHours.sort(function (a, b) {
         var keyA = a.hour,
             keyB = b.hour;
         // Compare the 2 dates
