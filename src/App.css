@@ -1,38 +1,59 @@
-.App {
-  text-align: center;
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap');
+
+
+:root{
+  --text-color:#ffff00
+}
+body{
+  margin: 0;
+  padding: 2rem 3%;
+  background-color: black;
+  color: whitesmoke;
+  font-family: 'Orbitron', sans-serif;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+main{
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  flex-direction: column;
+}
+section{
+  width: min(50rem,100%);
 }
 
-.App-link {
-  color: #61dafb;
+main .sectionHeader{
+  margin-bottom: 1.9rem;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+main .sectionTitle{
+  color:var(--text-color);
+}
+
+main .sectionTitle h2{
+  margin: unset;
+}
+main .sectionTitle span{
+  opacity: 0.8;
+}
+
+main .itemTitle{
+  color: var(--text-color);
+  font-family: 'Orbitron', sans-serif;
+}
+
+main .itemDesc{
+  color: whitesmoke;
+  font-family: 'Orbitron', sans-serif;
+}
+
+main .pushSubcribe{
+  background-color: unset;
+  border: unset;
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: var(--text-color);
 }
