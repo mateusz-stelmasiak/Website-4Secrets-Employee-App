@@ -39,6 +39,7 @@ export const allRooms = {
 export async function getRoomBookedHours(roomId, date) {
     const year = date.substr(0, 4);
     let bookedHours = [];
+    let roomName = allRooms[roomId];
 
     try {
         const response = await fetch('https://time4secrets.pl/wp-admin/admin-ajax.php', {
@@ -67,7 +68,7 @@ export async function getRoomBookedHours(roomId, date) {
             let roomHour = info[0];
             let roomInfo = info[1];
             if (roomInfo.status === 'booked') {
-                bookedHours.push(roomHour)
+                bookedHours.push({'hour': roomHour, 'room': roomName})
             }
         })
         return bookedHours
@@ -82,16 +83,10 @@ export async function getAllRoomsBookedHours(date) {
     let bookedHours = [];
     for (const room of Object.entries(allRooms)) {
         let roomId = room[0];
-        let currRoomName = allRooms[roomId];
         let currRoomBooked = await getRoomBookedHours(roomId, date);
 
         if (currRoomBooked.length === 0) continue;
-        //add room name to each hour booked, making it a {hour,Roomname} object
-        currRoomBooked.forEach((bookedHour) => {
-            let bookingObj = {'hour': bookedHour, 'room': currRoomName};
-            bookedHours.push(bookingObj)
-        })
-
+        bookedHours.concat(currRoomBooked)
     }
 
     //sort by hours
