@@ -12,6 +12,14 @@ const useSecretsAPI = () => {
         return `${year}-${month}-${day}`;
     }
 
+    let formatDateForApi = (date) =>{
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+
+        return `${year}-${month}-${day}`;
+    }
+
     let getAllBookingsToday = async ()=>{
         let currDate = getCurrDate();
         return await getAllBookingsByDate(currDate);
@@ -23,15 +31,14 @@ const useSecretsAPI = () => {
             console.error("missing date arg")
             return
         }
-        await setLoading(true)
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/rooms/${date}`);
+        let formatedDate = formatDateForApi(date);
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/rooms/${formatedDate}`);
         const data = await response.json();
-        await setLoading(false)
         return data;
     }
 
 
-    return {getAllBookingsToday,getAllBookingsByDate,loading}
+    return {getAllBookingsToday,getAllBookingsByDate,loading,setLoading}
 };
 
 export default useSecretsAPI;
