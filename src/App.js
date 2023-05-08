@@ -5,14 +5,14 @@ import usePushNotifications from "./usePushNotifications";
 import { List} from "antd";
 import {
     BellOutlined,
-    BellFilled
+    BellFilled,
 } from '@ant-design/icons';
 import Avatar from "antd/es/avatar/avatar";
 import {useSwipeable} from "react-swipeable"
 
 function App() {
     const {register,featureAvailable} = usePushNotifications()
-    const {getAllBookingsToday,getAllBookingsByDate,loading,setLoading} = useSecretsAPI()
+    const {getAllBookingsByDate,loading,setLoading} = useSecretsAPI()
     const [shownBookings,setShownBookings] = useState([])
     const [selectedDate,setSelectedDate] = useState(new Date());
     const apiCallTimeout = useRef();
@@ -112,6 +112,10 @@ function App() {
                             </List.Item>
                         )}
                     />
+                    <div className={"refreshContainer"}>
+                        <button onClick={()=>updateBookingList(selectedDate)}>⟳</button>
+                    </div>
+
                 </div>
 
             </section>
