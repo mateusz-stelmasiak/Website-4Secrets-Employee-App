@@ -79,5 +79,6 @@ main .refreshContainer button{
   border: unset;
   color: black;
   cursor: pointer;
+  font-size: 1.4rem;
 
 }

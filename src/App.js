@@ -92,11 +92,6 @@ function App() {
                 </div>
 
                 <div {...swipeHandlers} className={"swipableArea"}>
-                    {/*<div>*/}
-                    {/*    <button className={"pushSubcribe"} onClick={()=>changeSelectedDate(-1)}>&lt;</button>*/}
-                    {/*    */}
-                    {/*    <button className={"pushSubcribe"} onClick={()=>changeSelectedDate(1)}>&gt;</button>*/}
-                    {/*</div>*/}
                     <List
                         locale={{emptyText: <span className={"itemTitle"}>--<br/> brak rezerwacji</span>}}
                         itemLayout="horizontal"
@@ -113,7 +108,9 @@ function App() {
                         )}
                     />
                     <div className={"refreshContainer"}>
+                        <button className={"pushSubcribe"} onClick={()=>changeSelectedDate(-1)}>&lt;</button>
                         <button onClick={()=>updateBookingList(selectedDate)}>⟳</button>
+                        <button className={"pushSubcribe"} onClick={()=>changeSelectedDate(1)}>&gt;</button>
                     </div>
 
                 </div>
