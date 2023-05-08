@@ -55,6 +55,7 @@ function App() {
 
 
                 <List
+                    locale={{emptyText: <span className={"itemTitle"}>--<br/> brak rezerwacji</span>}}
                     itemLayout="horizontal"
                     loading={loading}
                     dataSource={todaysBookings}

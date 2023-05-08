@@ -15,7 +15,6 @@ const allowCors = fn => async (req, res) => {
     if (req.method === 'OPTIONS') {
         res.status(200).end()
         return
-
     }
     return await fn(req, res)
 }
@@ -71,6 +70,7 @@ export async function getRoomBookedHours(roomId, date) {
                 bookedHours.push({'hour': roomHour, 'room': roomName})
             }
         })
+
         return bookedHours
 
     } catch (error) {
@@ -86,12 +86,11 @@ export async function getAllRoomsBookedHours(date) {
         let currRoomBooked = await getRoomBookedHours(roomId, date);
 
         if (currRoomBooked.length === 0) continue;
-        bookedHours.concat(currRoomBooked)
+        bookedHours = bookedHours.concat(currRoomBooked)
     }
-
     //sort by hours
     bookedHours.sort(function (a, b) {
-        var keyA = a.hour,
+        let keyA = a.hour,
             keyB = b.hour;
         // Compare the 2 dates
         if (keyA < keyB) return -1;
