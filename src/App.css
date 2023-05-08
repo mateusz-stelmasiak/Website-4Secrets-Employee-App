@@ -11,6 +11,9 @@ body{
   color: whitesmoke;
   font-family: 'Orbitron', sans-serif;
 }
+main .ant-spin-dot-item {
+  background-color: var(--text-color)!important;
+}
 
 main{
   display: flex;
