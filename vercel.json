@@ -1,1 +1,6 @@
-{}
+{
+  "crons": [{
+    "path": "/api/expireSubscriptions",
+    "schedule": "0 0 * * *"
+  }]
+}
