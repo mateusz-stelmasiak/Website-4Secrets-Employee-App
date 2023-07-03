@@ -1,5 +1,6 @@
-import {push, ref, set,query,orderByChild,orderByKey,get} from "firebase/database";
+import {push, ref, set, query, orderByChild, orderByKey, get} from "firebase/database";
 import {firebaseDb} from "../firebase-config";
+
 const webpush = require('web-push');
 
 export const allRooms = {
@@ -26,13 +27,13 @@ export default async function handler(request, response) {
     await set(newItemRef, currentState);
 
     //Last seen state was empty till now (aka. first load)
-    if(!lastSeenState) return;
+    if (!lastSeenState) return;
 
     //Get new reservations
-    let newReservations =[];
-    currentState.forEach((reservation)=>{
+    let newReservations = [];
+    currentState.forEach((reservation) => {
         //reservations match
-        if(lastSeenState.find((x)=>(x.hour===reservation.hour) && (x.room===reservation.room))){
+        if (lastSeenState.find((x) => (x.hour === reservation.hour) && (x.room === reservation.room))) {
             return;
         }
         newReservations.push(reservation);
@@ -40,45 +41,56 @@ export default async function handler(request, response) {
 
     //Get cancled reservations
     let canceledReservations = [];
-    lastSeenState.forEach((reservation)=>{
+    lastSeenState.forEach((reservation) => {
         //reservations match
-        if(currentState.find((x)=>(x.hour===reservation.hour) && (x.room===reservation.room))){
+        if (currentState.find((x) => (x.hour === reservation.hour) && (x.room === reservation.room))) {
             return;
         }
         canceledReservations.push(reservation);
     })
     //remove canceled from new
-    newReservations = newReservations.filter( ( el ) => !canceledReservations.includes( el ));
-
-    //nothing changed, just return
-    if(newReservations.length ===0 && canceledReservations.length ===0){
-        //console.log("NO NEW")
-        return;
-    }
-
+    newReservations = newReservations.filter((el) => !canceledReservations.includes(el));
     //Get list of all subscribed web push endpoints
     let subscribers = await getSnapshot("/subscribed");
 
-    //iterate through new reservations and send push notifications to all subscribers
-    newReservations.forEach((newReservation)=>{
-        const payload = JSON.stringify({ title: "Nowa rezerwacja!" ,
-            body:`${newReservation.hour} - ${newReservation.room}`,
-            icon:process.env.LOGO_URL
+    //nothing changed, just return
+    if (newReservations.length === 0 && canceledReservations.length === 0) {
+        const payload = JSON.stringify({
+            title: "NIHIL NOVI!",
+            body: `sul solei`,
+            icon: process.env.LOGO_URL
         });
 
-        subscribers.forEach(async (subscription)=>{
+        subscribers.forEach(async (subscription) => {
+            await webpush
+                .sendNotification(subscription, payload)
+                .catch(err => console.error(err));
+        })
+        return;
+    }
+
+    //iterate through new reservations and send push notifications to all subscribers
+    newReservations.forEach((newReservation) => {
+        const payload = JSON.stringify({
+            title: "Nowa rezerwacja!",
+            body: `${newReservation.hour} - ${newReservation.room}`,
+            icon: process.env.LOGO_URL
+        });
+
+        subscribers.forEach(async (subscription) => {
             await webpush
                 .sendNotification(subscription, payload)
                 .catch(err => console.error(err));
         })
     })
-    canceledReservations.forEach((canceledReservation)=>{
-        const payload = JSON.stringify({ title: "Rezerwacja odwołana!" ,
-            body:`Odwołano ${canceledReservation.hour} - ${canceledReservation.room}`,
-            icon:process.env.LOGO_URL
+    canceledReservations.forEach((canceledReservation) => {
+        const payload = JSON.stringify({
+            title: "Rezerwacja odwołana!",
+            body: `Odwołano ${canceledReservation.hour} - ${canceledReservation.room}`,
+            icon: process.env.LOGO_URL
         });
 
-        subscribers.forEach(async (subscription)=>{
+        subscribers.forEach(async (subscription) => {
             await webpush
                 .sendNotification(subscription, payload)
                 .catch(err => console.error(err));
@@ -87,7 +99,7 @@ export default async function handler(request, response) {
     return response.status(200).json({});
 }
 
-function getCurrDate(){
+function getCurrDate() {
     const today = new Date();
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0');
@@ -96,23 +108,25 @@ function getCurrDate(){
     return `${year}-${month}-${day}`;
 }
 
-async function getSnapshot(path,orderBy){
+async function getSnapshot(path, orderBy) {
     let quer = await query(ref(firebaseDb, path)
-        ,(orderBy ? orderByChild(orderBy) : orderByKey())
+        , (orderBy ? orderByChild(orderBy) : orderByKey())
     );
 
     let snapshot = await get(quer);
-    let items =[];
-    snapshot.forEach((snap)=>{
+    let items = [];
+    snapshot.forEach((snap) => {
         items.unshift(snap.val());
     })
     //handle single items
-    if(items.length ===0){items = snapshot.val();}
+    if (items.length === 0) {
+        items = snapshot.val();
+    }
     return items;
 }
 
-export async function getRoomBookedHours(roomId,date){
-    const year = date.substr(0,4);
+export async function getRoomBookedHours(roomId, date) {
+    const year = date.substr(0, 4);
     let bookedHours = [];
 
     try {
@@ -138,10 +152,10 @@ export async function getRoomBookedHours(roomId,date){
         const parsedData = JSON.parse(data[date]);
         //extract hours from data
 
-        Object.entries(parsedData['hours']).forEach((info)=>{
+        Object.entries(parsedData['hours']).forEach((info) => {
             let roomHour = info[0];
             let roomInfo = info[1];
-            if(roomInfo.status ==='booked'){
+            if (roomInfo.status === 'booked') {
                 bookedHours.push(roomHour)
             }
         })
@@ -153,24 +167,24 @@ export async function getRoomBookedHours(roomId,date){
 
 }
 
-export async function getAllRoomsBookedHours(date){
+export async function getAllRoomsBookedHours(date) {
     let bookedHours = [];
     for (const room of Object.entries(allRooms)) {
         let roomId = room[0];
         let currRoomName = allRooms[roomId];
-        let currRoomBooked = await getRoomBookedHours(roomId,date);
+        let currRoomBooked = await getRoomBookedHours(roomId, date);
 
-        if(currRoomBooked.length === 0) continue;
+        if (currRoomBooked.length === 0) continue;
         //add room name to each hour booked, making it a {hour,Roomname} object
-        currRoomBooked.forEach((bookedHour)=>{
-            let bookingObj = {'hour':bookedHour,'room':currRoomName};
+        currRoomBooked.forEach((bookedHour) => {
+            let bookingObj = {'hour': bookedHour, 'room': currRoomName};
             bookedHours.push(bookingObj)
         })
 
     }
 
     //sort by hours
-    bookedHours.sort(function(a, b) {
+    bookedHours.sort(function (a, b) {
         var keyA = a.hour,
             keyB = b.hour;
         // Compare the 2 dates
