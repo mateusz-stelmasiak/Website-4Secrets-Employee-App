@@ -1,12 +1,25 @@
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
 
 
 const usePushNotifications = ()=>{
     const featureAvailable = "serviceWorker" in navigator
     const publicVapidKey =
         "BKUCiPCKcs5ER21--Nu-sA5QkUNUKXudDVyrtAmrW-UF38U3H3-VwFDp8LUmW4asBavbXjCqxpqU7fhmJBaPFAQ";
+    const [loading,setLoading] = useState(false);
+    const [worker,setWorker] = useState()
 
-    // Register SW, Register Push, Send Push
+
+    useEffect(()=>{
+        registerSW();
+    },[])
+
+    let registerSW = async ()=>{
+        // Register Service Worker
+        const worker = await navigator.serviceWorker.register("/worker.js", {
+            scope: "/"
+        });
+        setWorker(worker);
+    }
     async function register() {
         // Check for service worker
         if (!featureAvailable) {
@@ -14,26 +27,25 @@ const usePushNotifications = ()=>{
             return
         }
 
-        // Register Service Worker
-        const register = await navigator.serviceWorker.register("/worker.js", {
-            scope: "/"
-        });
+        if(!worker){await registerSW();}
+        setLoading(true);
 
         // Register Push
-        const subscription = await register.pushManager.subscribe({
+        const subscription = await worker.pushManager.subscribe({
             userVisibleOnly: true,
             applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
         });
 
-        try{
-            await fetch(`${process.env.REACT_APP_API_URL}/subscribe`, {
-                method: "POST",
-                body: JSON.stringify(subscription),
-                headers: {
-                    "content-type": "application/json"
-                }
-            });
-        }catch (e){console.error(e)}
+
+        let resp = await fetch(`${process.env.REACT_APP_API_URL}/subscribe`, {
+            method: "POST",
+            body: JSON.stringify(subscription),
+            headers: {
+                "content-type": "application/json"
+            }
+        });
+        setLoading(false);
+        return resp;
     }
 
     function urlBase64ToUint8Array(base64String) {
@@ -51,7 +63,7 @@ const usePushNotifications = ()=>{
         return outputArray;
     }
 
-    return {register,featureAvailable}
+    return {register,featureAvailable,loading}
 }
 
 export default usePushNotifications;

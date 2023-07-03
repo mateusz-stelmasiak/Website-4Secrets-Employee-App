@@ -2,7 +2,7 @@ import './App.css';
 import {useEffect, useRef, useState} from "react";
 import useSecretsAPI from "./useSecretsAPI";
 import usePushNotifications from "./usePushNotifications";
-import { List} from "antd";
+import {List, message, Spin} from "antd";
 import {
     BellOutlined,
     BellFilled,
@@ -11,7 +11,7 @@ import Avatar from "antd/es/avatar/avatar";
 import {useSwipeable} from "react-swipeable"
 
 function App() {
-    const {register,featureAvailable} = usePushNotifications()
+    const {register,featureAvailable,loading:pushLoading} = usePushNotifications()
     const {getAllBookingsByDate,loading,setLoading} = useSecretsAPI()
     const [shownBookings,setShownBookings] = useState([])
     const [selectedDate,setSelectedDate] = useState(new Date());
@@ -22,6 +22,7 @@ function App() {
         trackTouch: true,                      // track touch input
         trackMouse: true,                     // track mouse input
     });
+    const [messageApi, contextHolder] = message.useMessage();
 
     const roomIcons = {
         "Cosa Nostra":"https://time4secrets.pl/wp-content/uploads/2015/09/Kopiuj-z-cosa-nostra.jpg",
@@ -75,8 +76,21 @@ function App() {
         return `${weekday}, ${day}/${month}/${year}`;
     }
 
+    let atemptToRegister = async ()=>{
+        let res = await register()
+        if(!res.ok){
+            const jsonData = await res.json();
+            //display error
+            messageApi.open({
+                type: 'error',
+                content: jsonData.Error,
+            });
+        }
+    }
+
     return (
         <main>
+            {contextHolder}
             <section>
 
                 <div className={"sectionHeader"}>
@@ -85,10 +99,12 @@ function App() {
                         <span>({selectedDate && formatDate(selectedDate)})</span>
                     </div>
 
+                    <Spin spinning={pushLoading}>
+                        <button className={"pushSubcribe"} onClick={()=>atemptToRegister()} disabled={!featureAvailable}>
+                            <BellOutlined />
+                        </button>
+                    </Spin>
 
-                    <button className={"pushSubcribe"} onClick={register} disabled={!featureAvailable}>
-                        <BellOutlined />
-                    </button>
                 </div>
 
                 <div {...swipeHandlers} className={"swipableArea"}>
@@ -98,7 +114,7 @@ function App() {
                         loading={loading}
                         dataSource={shownBookings}
                         renderItem={(item, index) => (
-                            <List.Item>
+                            <List.Item id={"booking_"+index}>
                                 <List.Item.Meta
                                     avatar={<Avatar src={roomIcons[item.room]}/>}
                                     title={<span className={"itemTitle"}>{item.hour}</span>}
