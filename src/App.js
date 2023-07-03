@@ -87,7 +87,7 @@ function App() {
             });
         }
     }
-
+        
     return (
         <main>
             {contextHolder}
@@ -106,7 +106,6 @@ function App() {
                     </Spin>
 
                 </div>
-
                 <div {...swipeHandlers} className={"swipableArea"}>
                     <List
                         locale={{emptyText: <span className={"itemTitle"}>--<br/> brak rezerwacji</span>}}

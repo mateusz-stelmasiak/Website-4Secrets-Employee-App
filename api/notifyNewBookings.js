@@ -2,6 +2,12 @@ import {push, ref, set,query,orderByChild,orderByKey,get} from "firebase/databas
 import {firebaseDb} from "../firebase-config";
 const webpush = require('web-push');
 
+export const allRooms = {
+    1: 'Kolekcjoner',
+    4: 'Cosa Nostra',
+    5: 'Skarb Czarnobrodego',
+};
+
 webpush.setVapidDetails(
     "mailto:mateusz.stelmasiak@gmail.com",
     process.env.PUBLIC_VAPID_KEY,
@@ -22,17 +28,33 @@ export default async function handler(request, response) {
     //Last seen state was empty till now (aka. first load)
     if(!lastSeenState) return;
 
-    //Get all differences between states
+    //Get new reservations
     let newReservations =[];
     currentState.forEach((reservation)=>{
+        //reservations match
         if(lastSeenState.find((x)=>(x.hour===reservation.hour) && (x.room===reservation.room))){
             return;
         }
         newReservations.push(reservation);
     })
 
+    //Get cancled reservations
+    let canceledReservations = [];
+    lastSeenState.forEach((reservation)=>{
+        //reservations match
+        if(currentState.find((x)=>(x.hour===reservation.hour) && (x.room===reservation.room))){
+            return;
+        }
+        canceledReservations.push(reservation);
+    })
+    //remove canceled from new
+    newReservations = newReservations.filter( ( el ) => !canceledReservations.includes( el ));
+
     //nothing changed, just return
-    if(newReservations.length ===0){return;}
+    if(newReservations.length ===0 && canceledReservations.length ===0){
+        //console.log("NO NEW")
+        return;
+    }
 
     //Get list of all subscribed web push endpoints
     let subscribers = await getSnapshot("/subscribed");
@@ -44,8 +66,20 @@ export default async function handler(request, response) {
             icon:process.env.LOGO_URL
         });
 
-        subscribers.forEach((subscription)=>{
-            webpush
+        subscribers.forEach(async (subscription)=>{
+            await webpush
+                .sendNotification(subscription, payload)
+                .catch(err => console.error(err));
+        })
+    })
+    canceledReservations.forEach((canceledReservation)=>{
+        const payload = JSON.stringify({ title: "Rezerwacja odwołana!" ,
+            body:`Odwołano ${canceledReservation.hour} - ${canceledReservation.room}`,
+            icon:process.env.LOGO_URL
+        });
+
+        subscribers.forEach(async (subscription)=>{
+            await webpush
                 .sendNotification(subscription, payload)
                 .catch(err => console.error(err));
         })
