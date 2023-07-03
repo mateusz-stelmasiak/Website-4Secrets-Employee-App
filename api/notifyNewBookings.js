@@ -55,17 +55,17 @@ export default async function handler(request, response) {
 
     //nothing changed, just return
     if (newReservations.length === 0 && canceledReservations.length === 0) {
-        const payload = JSON.stringify({
-            title: "NIHIL NOVI!",
-            body: `sul solei`,
-            icon: process.env.LOGO_URL
-        });
-
-        subscribers.forEach(async (subscription) => {
-            await webpush
-                .sendNotification(subscription, payload)
-                .catch(err => console.error(err));
-        })
+        // const payload = JSON.stringify({
+        //     title: "NIHIL NOVI!",
+        //     body: `sul solei`,
+        //     icon: process.env.LOGO_URL
+        // });
+        //
+        // subscribers.forEach(async (subscription) => {
+        //     await webpush
+        //         .sendNotification(subscription, payload)
+        //         .catch(err => console.error(err));
+        // })
         return;
     }
 
