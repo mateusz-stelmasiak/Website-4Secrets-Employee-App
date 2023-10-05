@@ -2,8 +2,8 @@
 A quick app that fetches data from https://time4secrets.pl/rezerwacje/ and displays it in a more employee friendly manner. Built with React.js, implements WebPushNotifications ([RFC 8292](https://datatracker.ietf.org/group/webpush/documents/)).
 
 ## Screenshots
-![screencapture-4secrets-vercel-app-2023-09-12-13_56_41](https://github.com/mateusz-stelmasiak/Website-4Secrets-Employee-App/assets/46268673/2991eb95-0e88-453b-a32c-1c65bb27f700)
-![371517434_284402000996800_3489538815578373688_n](https://github.com/mateusz-stelmasiak/Website-4Secrets-Employee-App/assets/46268673/f74d30b8-0560-44c1-8bbf-3d0ad8d731d7)
+![image](https://github.com/mateusz-stelmasiak/Website-4Secrets-Employee-App/assets/46268673/b3884ab6-5e9b-47d4-9f76-d475a9774d33)
+
 
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
